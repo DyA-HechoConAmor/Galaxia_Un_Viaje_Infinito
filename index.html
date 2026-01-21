@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Para Andrea | Un Viaje Infinito</title>
+    <style>
+        :root {
+            --depth: 2000px;
+            --pink-glow: rgba(255, 105, 180, 0.6);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: #020205;
+            overflow: hidden;
+            font-family: 'Georgia', serif;
+            color: white;
+        }
+
+        /* ESCENARIO 3D */
+        #viewport {
+            width: 100vw; height: 100vh;
+            perspective: var(--depth);
+            perspective-origin: 50% 50%;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        #world {
+            transform-style: preserve-3d;
+            width: 100%; height: 100%;
+            position: relative;
+            display: flex; justify-content: center; align-items: center;
+            will-change: transform;
+        }
+
+        /* FOTOS (PARTÍCULAS) */
+        .photo-particle {
+            position: absolute;
+            width: 120px; height: 120px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            box-shadow: 0 0 20px var(--pink-glow);
+            transition: opacity 0.8s ease;
+            will-change: transform, opacity;
+        }
+
+        /* NOMBRE FINAL */
+        #name-container {
+            position: absolute;
+            display: flex;
+            transform-style: preserve-3d;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .letter {
+            font-size: clamp(3rem, 15vw, 8rem);
+            color: white;
+            opacity: 0;
+            font-weight: bold;
+            text-shadow: 0 0 30px rgba(255,255,255,0.8), 0 0 50px var(--pink-glow);
+            transition: all 1.8s cubic-bezier(0.19, 1, 0.22, 1);
+            transform: translateZ(-1200px) scale(0.5);
+            margin: 0 10px;
+        }
+
+        /* EFECTOS ESPECIALES */
+        @keyframes camera-shake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            20% { transform: translate(-3px, -2px) rotate(-1deg); }
+            40% { transform: translate(-1px, 2px) rotate(1deg); }
+            60% { transform: translate(3px, 1px) rotate(0deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .shake-active { animation: camera-shake 0.1s infinite; }
+
+        .flash-effect {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; opacity: 0; pointer-events: none; z-index: 100;
+        }
+
+        @keyframes flash-anim {
+            0% { opacity: 0.9; }
+            100% { opacity: 0; }
+        }
+
+        .shooting-star {
+            position: absolute; width: 2px; height: 2px;
+            background: white; border-radius: 50%;
+            box-shadow: 0 0 10px 2px white, 0 0 20px 4px var(--pink-glow);
+            opacity: 0; pointer-events: none; will-change: transform, opacity;
+        }
+
+        @keyframes shoot {
+            0% { transform: translate3d(var(--startX), var(--startY), var(--startZ)) scale(0.1); opacity: 0; }
+            15% { opacity: 1; }
+            100% { transform: translate3d(var(--endX), var(--endY), var(--endZ)) scale(1.2); opacity: 0; }
+        }
+
+        #instructions {
+            position: fixed; bottom: 30px; width: 100%;
+            text-align: center; color: rgba(255,255,255,0.3);
+            letter-spacing: 3px; font-size: 0.7rem; text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="viewport">
+        <div id="world">
+            <div id="name-container"></div>
+        </div>
+    </div>
+
+    <div id="instructions">Desliza para viajar hacia Andy</div>
+
+    <script>
+        const world = document.getElementById('world');
+        const nameContainer = document.getElementById('name-container');
+        const name = "ANDY";
+        const photos = ['fotos/1.jpg', 'fotos/2.jpg', 'fotos/3.jpg', 'fotos/4.jpg', 'fotos/5.jpg']; // <--- AJUSTA TUS FOTOS AQUÍ
+        const totalParticles = 45;
+        let scrollY = 0;
+        let hasShaken = false;
+        let starsInterval = null;
+
+        // 1. Crear Flash
+        const flash = document.createElement('div');
+        flash.className = 'flash-effect';
+        document.body.appendChild(flash);
+
+        // 2. Crear Letras
+        name.split('').forEach(char => {
+            const span = document.createElement('span');
+            span.className = 'letter';
+            span.innerText = char;
+            nameContainer.appendChild(span);
+        });
+
+        // 3. Crear Partículas (Fotos) en el espacio
+        const particles = [];
+        for(let i=0; i < totalParticles; i++) {
+            const p = document.createElement('div');
+            p.className = 'photo-particle';
+            p.style.backgroundImage = url(`${photos[i % photos.length]}`);
+            
+            const x = (Math.random() - 0.5) * window.innerWidth * 2.5;
+            const y = (Math.random() - 0.5) * window.innerHeight * 2.5;
+            const z = -Math.random() * 6000; 
+            
+            const state = { x, y, z, element: p };
+            particles.push(state);
+            world.appendChild(p);
+        }
+
+        // 4. Lógica de Estrellas Fugaces
+        function createShootingStar() {
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+            document.body.appendChild(star);
+
+            const startX = (Math.random() - 0.5) * window.innerWidth;
+            const startY = -window.innerHeight/2;
+            const startZ = -Math.random() * 1000;
+
+            star.style.setProperty('--startX', `${startX}px)`;
+            star.style.setProperty('--startY', `${startY}px)`;
+            star.style.setProperty('--startZ', `${startZ}px)`;
+            star.style.setProperty('--endX', `${startX + (Math.random()*400-200)}px)`;
+            star.style.setProperty('--endY', `${window.innerHeight}px)`;
+            star.style.setProperty('--endZ', `${startZ + 500}px)`;
+            
+            star.style.animation = `shoot ${1 + Math.random()*2}s linear forwards`;
+            star.addEventListener('animationend', () => star.remove());
+        }
+
+        function triggerImpact() {
+            world.classList.add('shake-active');
+            flash.style.animation = 'none';
+            flash.offsetHeight; 
+            flash.style.animation = 'flash-anim 1s ease-out forwards';
+            
+            setTimeout(() => world.classList.remove('shake-active'), 600);
+
+            if (!starsInterval) {
+                starsInterval = setInterval(createShootingStar, 400);
+            }
+        }
+
+        // 5. Motor de Renderizado
+        function update() {
+            particles.forEach(p => {
+                const currentZ = p.z + scrollY;
+                let opacity = 1;
+
+                // Desvanecer fotos que pasan la cámara o están muy lejos
+                if (currentZ > -100) opacity = Math.max(0, 1 - (currentZ + 100) / 500);
+                if (currentZ < -5000) opacity = 0;
+
+                p.element.style.opacity = opacity;
+                p.element.style.transform = `translate3d(${p.x}px, ${p.y}px, ${currentZ}px) rotate(${currentZ/20}deg)`;
+            });
+
+            const letters = document.querySelectorAll('.letter');
+            
+            // Umbral de activación del nombre
+            if(scrollY > 5500) {
+                if(!hasShaken) {
+                    triggerImpact();
+                    hasShaken = true;
+                }
+                letters.forEach((l, i) => {
+                    l.style.opacity = "1";
+                    l.style.transform = "translateZ(0px) scale(1)";
+                    l.style.transitionDelay = `${i * 0.1}s`;
+                });
+            } else {
+                if(hasShaken) {
+                    clearInterval(starsInterval);
+                    starsInterval = null;
+                    hasShaken = false;
+                }
+                letters.forEach(l => {
+                    l.style.opacity = "0";
+                    l.style.transform = "translateZ(-1200px) scale(0.5)";
+                    l.style.transitionDelay = "0s";
+                });
+            }
+            requestAnimationFrame(update);
+        }
+
+        // 6. Eventos de Interacción
+        window.addEventListener('wheel', (e) => {
+            scrollY += e.deltaY * 1.5;
+            if(scrollY < 0) scrollY = 0;
+        });
+
+        let touchY = 0;
+        window.addEventListener('touchstart', e => touchY = e.touches[0].clientY);
+        window.addEventListener('touchmove', e => {
+            const delta = (touchY - e.touches[0].clientY) * 3;
+            scrollY += delta;
+            touchY = e.touches[0].clientY;
+            if(scrollY < 0) scrollY = 0;
+        });
+
+        update();
+    </script>
+</body>
+</html>
