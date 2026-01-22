@@ -19,6 +19,24 @@
             color: white;
         }
 
+        #galaxy-canvas {
+            display: block;
+
+        #music-control {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            z-index: 20;
+            backdrop-filter: blur(5px);
+        }
+                    
         /* ESCENARIO 3D */
         #viewport {
             width: 100vw; height: 100vh;
@@ -117,7 +135,15 @@
         </div>
     </div>
 
-    <div id="instructions">Desliza para viajar hacia Andy</div>
+    <div id="instructions">Desliza para viajar hacia Andrea</div>
+
+    <button id="music-control">🎵</button>
+    
+    <audio id="background-music" loop>
+        <source src="Hecha_pa_mi-Boza.mp3" type="audio/mpeg">
+    </audio>
+
+    <canvas id="galaxy-canvas"></canvas>
 
     <script>
         const world = document.getElementById('world');
@@ -249,11 +275,21 @@
             if(scrollY < 0) scrollY = 0;
         });
 
+        // 9. Música
+        const btn = document.getElementById('music-control');
+        const music = document.getElementById('background-music');
+        if(btn && music) {
+            btn.onclick = () => {
+                if(music.paused) { music.play(); btn.innerText = "⏸️"; }
+                else { music.pause(); btn.innerText = "🎵"; }
+            };
+        }
         update();
     </script>
 </body>
 
 </html>
+
 
 
 
