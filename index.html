@@ -18,25 +18,7 @@
             font-family: 'Georgia', serif;
             color: white;
         }
-
-        #galaxy-canvas {
-            display: block;
-
-        #music-control {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            cursor: pointer;
-            z-index: 20;
-            backdrop-filter: blur(5px);
-        }
-                    
+          
         /* ESCENARIO 3D */
         #viewport {
             width: 100vw; height: 100vh;
@@ -124,6 +106,25 @@
             position: fixed; bottom: 30px; width: 100%;
             text-align: center; color: rgba(255,255,255,0.3);
             letter-spacing: 3px; font-size: 0.7rem; text-transform: uppercase;
+        }
+
+        /*MODIFICACIONES*/
+        #galaxy-canvas {
+            display: block;
+          
+        #music-control {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            z-index: 20;
+            backdrop-filter: blur(5px);
         }
     </style>
 </head>
@@ -274,7 +275,9 @@
             touchY = e.touches[0].clientY;
             if(scrollY < 0) scrollY = 0;
         });
-
+        
+        update();
+        
         // 9. Música
         const btn = document.getElementById('music-control');
         const music = document.getElementById('background-music');
@@ -284,11 +287,12 @@
                 else { music.pause(); btn.innerText = "🎵"; }
             };
         }
-        update();
+
     </script>
 </body>
 
 </html>
+
 
 
 
