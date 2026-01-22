@@ -147,7 +147,7 @@
         for(let i=0; i < totalParticles; i++) {
             const p = document.createElement('div');
             p.className = 'photo-particle';
-            p.style.backgroundImage = url(`${photos[i % photos.length]}`);
+            p.style.backgroundImage = `url(${photos[i % photos.length]})`;
             
             const x = (Math.random() - 0.5) * window.innerWidth * 2.5;
             const y = (Math.random() - 0.5) * window.innerHeight * 2.5;
@@ -168,12 +168,12 @@
             const startY = -window.innerHeight/2;
             const startZ = -Math.random() * 1000;
 
-            star.style.setProperty('--startX', `${startX}px)`;
-            star.style.setProperty('--startY', `${startY}px)`;
-            star.style.setProperty('--startZ', `${startZ}px)`;
-            star.style.setProperty('--endX', `${startX + (Math.random()*400-200)}px)`;
-            star.style.setProperty('--endY', `${window.innerHeight}px)`;
-            star.style.setProperty('--endZ', `${startZ + 500}px)`;
+            star.style.setProperty('--startX', `${startX}px`);
+            star.style.setProperty('--startY', `${startY}px`);
+            star.style.setProperty('--startZ', `${startZ}px`);
+            star.style.setProperty('--endX', `${startX + (Math.random()*400-200)}px`);
+            star.style.setProperty('--endY', `${window.innerHeight}px`);
+            star.style.setProperty('--endZ', `${startZ + 500}px`);
             
             star.style.animation = `shoot ${1 + Math.random()*2}s linear forwards`;
             star.addEventListener('animationend', () => star.remove());
@@ -254,3 +254,4 @@
 </body>
 
 </html>
+
